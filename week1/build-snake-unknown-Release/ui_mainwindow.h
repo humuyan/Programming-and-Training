@@ -14,6 +14,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLCDNumber>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
@@ -48,6 +49,7 @@ public:
     QPushButton *restartButton;
     QPushButton *quitButton;
     QLabel *label;
+    QLCDNumber *lcdNumber;
     QSpacerItem *horizontalSpacer;
     QMenuBar *menubar;
     QMenu *fileMenu;
@@ -144,6 +146,11 @@ public:
         label->setObjectName(QString::fromUtf8("label"));
 
         verticalLayout->addWidget(label);
+
+        lcdNumber = new QLCDNumber(groupBox);
+        lcdNumber->setObjectName(QString::fromUtf8("lcdNumber"));
+
+        verticalLayout->addWidget(lcdNumber);
 
 
         horizontalLayout->addWidget(groupBox);
