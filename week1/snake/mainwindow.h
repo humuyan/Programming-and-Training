@@ -33,17 +33,20 @@ class MainWindow : public QMainWindow {
 
 	private:
 		enum gameStatus {UNSTARTED, STARTED, PAUSED, ENDED};
-		enum direction {U, D, L, R};
+		enum direction {UP, DOWN, LEFT, RIGHT};
+		const static int Size = 40, RefreshPeriod = 200;
 		const int dx[4] = {0, 0, -1, 1};
 		const int dy[4] = {-1, 1, 0, 0};
 		struct position {
 			int x, y;
 		};
+		enum gridType {EMPTY, SNAKE, FOOD, HANDICAP};
+		const QColor color[4] = {Qt::gray, Qt::green, Qt::yellow, Qt::red};
 		Ui::MainWindow *ui;
 		gameStatus curStatus;
 		direction curDir;
 		int restLen, cnt;
-		QColor color[40][40];
+		gridType grid[Size][Size];
 		QTimer timer;
 		QQueue<position> snakePosition;
 		void paintEvent(QPaintEvent *e);

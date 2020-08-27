@@ -4,15 +4,17 @@
 #include <QMessageBox>
 #include <QtGlobal>
 #include <QTime>
+#include <QFileDialog>
 
 void MainWindow::paintEvent(QPaintEvent*) {
-	int x = 200, y = 100, d = std::min((height() - 100) / 40, (width() - 200) / 40);
-	for (int i = 0; i < 40; ++i) {
-		for (int j = 0; j < 40; ++j) {
+	int canvasHeight = height() - ui->toolBar->height() - ui->menubar->height(), canvasWidth = width() - ui->groupBox->width(), tableSize = std::min(canvasHeight, canvasWidth);
+	int gridSize = tableSize / Size, offsetX = (canvasWidth - tableSize) / 2 + ui->groupBox->width(), offsetY = (canvasHeight - tableSize) / 2 + ui->toolBar->height() + ui->menubar->height();
+	for (int i = 0; i < Size; ++i) {
+		for (int j = 0; j < Size; ++j) {
 			QPainter p(this);
-			p.setBrush(color[i][j]);
-			p.setPen(QPen(color[i][j], 0));
-			p.drawRect(x + i * d, y + j * d, d, d);
+			p.setBrush(color[grid[i][j]]);
+			p.setPen(QPen(color[grid[i][j]], 0));
+			p.drawRect(offsetX + i * gridSize, offsetY + j * gridSize, gridSize, gridSize);
 		}
 	}
 }
@@ -28,20 +30,21 @@ void MainWindow::setGameStatus(const gameStatus &x) {
 	ui->loadButton->setEnabled(load), ui->loadAction->setEnabled(load);
 	switch (curStatus) {
 		case UNSTARTED:
-			for (int i = 0; i < 40; ++i) {
-				for (int j = 0; j < 40; ++j) {
-					color[i][j] = (j == 19 && (i == 19 || i == 20)) ? Qt::green : Qt::gray;
+			for (int i = 0; i < Size; ++i) {
+				for (int j = 0; j < Size; ++j) {
+					grid[i][j] = (j == Size / 2 && (i == Size / 2 - 1 || i == Size / 2)) ? SNAKE : EMPTY;
 				}
 			}
 			update();
 			snakePosition.clear();
-			snakePosition.push_back({19, 19}), snakePosition.push_back({20, 19});
-			curDir = R;
+			snakePosition.push_back({Size / 2 - 1, Size / 2}), snakePosition.push_back({Size / 2, Size / 2});
+			curDir = RIGHT;
 			restLen = cnt = 0;
 			ui->lcdNumber->display(0);
 			break;
 		case STARTED:
-			timer.start(250);
+			timer.start(RefreshPeriod);
+			setFocus();
 			break;
 		case PAUSED:
 			timer.stop();
@@ -54,9 +57,11 @@ void MainWindow::setGameStatus(const gameStatus &x) {
 }
 void MainWindow::mousePressEvent(QMouseEvent *e) {
 	if (e->button() == Qt::LeftButton && curStatus == UNSTARTED) {
-		int x = 200, y = 100, d = std::min((height() - 100) / 40, (width() - 200) / 40), i = (e->x() - x) / d, j = (e->y() - y) / d;
-		if (i >= 0 && i < 40 && j >= 0 && j < 40 && !(j == 19 && (i == 19 || i == 20))) {
-			color[i][j] = (color[i][j] == Qt::red) ? Qt::gray : Qt::red;
+		int canvasHeight = height() - ui->toolBar->height() - ui->menubar->height(), canvasWidth = width() - ui->groupBox->width(), tableSize = std::min(canvasHeight, canvasWidth);
+		int gridSize = tableSize / Size, offsetX = (canvasWidth - tableSize) / 2 + ui->groupBox->width(), offsetY = (canvasHeight - tableSize) / 2 + ui->toolBar->height() + ui->menubar->height();
+		int i = (e->x() - offsetX) / gridSize, j = (e->y() - offsetY) / gridSize;
+		if (i >= 0 && i < Size && j >= 0 && j < Size && !(j == 19 && (i == 19 || i == 20))) {
+			grid[i][j] = (grid[i][j] == HANDICAP) ? EMPTY : HANDICAP;
 		}
 		update();
 	}
@@ -64,26 +69,17 @@ void MainWindow::mousePressEvent(QMouseEvent *e) {
 void MainWindow::generateFood() {
 	int i, j;
 	do {
-		i = qrand() % 40, j = qrand() % 40;
-	} while (color[i][j] != Qt::gray);
-	color[i][j] = Qt::yellow;
+		i = qrand() % Size, j = qrand() % Size;
+	} while (grid[i][j] != EMPTY);
+	grid[i][j] = FOOD;
 	update();
 }
 void MainWindow::keyPressEvent(QKeyEvent *e) {
 	if (curStatus == STARTED) {
-		if (e->key() == Qt::Key_Up && curDir != D) {
-			curDir = U;
-		}
-		if (e->key() == Qt::Key_Down && curDir != U) {
-			curDir = D;
-		}
-		if (e->key() == Qt::Key_Left && curDir != R) {
-			curDir = L;
-		}
-		if (e->key() == Qt::Key_Right && curDir != L) {
-			curDir = R;
-		}
-		move();
+		if (e->key() == Qt::Key_Up && curDir != DOWN) curDir = UP, move();
+		if (e->key() == Qt::Key_Down && curDir != UP) curDir = DOWN, move();
+		if (e->key() == Qt::Key_Left && curDir != RIGHT) curDir = LEFT, move();
+		if (e->key() == Qt::Key_Right && curDir != LEFT) curDir = RIGHT, move();
 	}
 }
 void MainWindow::quit() {
@@ -103,10 +99,48 @@ void MainWindow::restart() {
 	setGameStatus(UNSTARTED);
 }
 void MainWindow::save() {
-	// TODO
+	QString fileName = QFileDialog::getSaveFileName(this, "", "./", "贪吃蛇存档文件(*.snake)");
+	if (fileName != "") {
+		QFile output(fileName);
+		output.open(QIODevice::WriteOnly);
+		QDataStream out(&output);
+		for (int i = 0; i < Size; ++i) {
+			for (int j = 0; j < Size; ++j) {
+				out << qint8(grid[i][j]);
+			}
+		}
+		out << qint32(cnt) << qint8(curDir) << qint16(snakePosition.size());
+		for (position g: snakePosition) {
+			out << qint8(g.x) << qint8(g.y);
+		}
+		output.close();
+	}
 }
 void MainWindow::load() {
-	// TODO
+	QString fileName = QFileDialog::getOpenFileName(this, "", "./", "贪吃蛇存档文件(*.snake)");
+	if (fileName != "") {
+		QFile input(fileName);
+		input.open(QIODevice::ReadOnly);
+		QDataStream in(&input);
+		qint8 x, y;
+		for (int i = 0; i < Size; ++i) {
+			for (int j = 0; j < Size; ++j) {
+				in >> x;
+				grid[i][j] = gridType(x);
+			}
+		}
+		qint16 z;
+		in >> cnt >> x >> z;
+		curDir = direction(x);
+		snakePosition.clear();
+		while (z--) {
+			in >> x >> y;
+			snakePosition.push_back({x, y});
+		}
+		input.close();
+		update();
+		setGameStatus(PAUSED);
+	}
 }
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
@@ -122,31 +156,31 @@ MainWindow::~MainWindow() {
 
 void MainWindow::move() {
 	position curHead = snakePosition.back(), nextHead = {curHead.x + dx[curDir], curHead.y + dy[curDir]};
-	if (nextHead.x < 0 || nextHead.x >= 40 || nextHead.y < 0 || nextHead.y >= 40 || color[nextHead.x][nextHead.y] == Qt::red || color[nextHead.x][nextHead.y] == Qt::green) {
+	if (nextHead.x < 0 || nextHead.x >= Size || nextHead.y < 0 || nextHead.y >= Size || grid[nextHead.x][nextHead.y] == HANDICAP || grid[nextHead.x][nextHead.y] == SNAKE) {
 		setGameStatus(ENDED);
 		return;
 	}
-	if (color[nextHead.x][nextHead.y] == Qt::yellow) {
+	if (grid[nextHead.x][nextHead.y] == FOOD) {
 		restLen += 3;
 		generateFood();
 	}
-	color[nextHead.x][nextHead.y] = Qt::green;
+	grid[nextHead.x][nextHead.y] = SNAKE;
 	snakePosition.push_back(nextHead);
 	if (restLen) {
 		--restLen;
 	} else {
 		position curTail = snakePosition.front();
 		snakePosition.pop_front();
-		color[curTail.x][curTail.y] = Qt::gray;
+		grid[curTail.x][curTail.y] = EMPTY;
 	}
 	update();
 	ui->lcdNumber->display(++cnt);
 }
 void MainWindow::on_quitButton_clicked() { quit(); }
 void MainWindow::on_quitAction_triggered() { quit(); }
-void MainWindow::on_startButton_clicked() {	start(); }
+void MainWindow::on_startButton_clicked() { start(); }
 void MainWindow::on_startAction_triggered() { start(); }
-void MainWindow::on_pauseButton_clicked() {	pause(); }
+void MainWindow::on_pauseButton_clicked() { pause(); }
 void MainWindow::on_pauseAction_triggered() { pause(); }
 void MainWindow::on_resumeButton_clicked() { resume(); }
 void MainWindow::on_resumeAction_triggered() { resume(); }

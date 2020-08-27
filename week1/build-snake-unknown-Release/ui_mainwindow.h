@@ -90,7 +90,7 @@ public:
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         startButton = new QPushButton(groupBox);
         startButton->setObjectName(QString::fromUtf8("startButton"));
-        QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Fixed);
         sizePolicy1.setHorizontalStretch(0);
         sizePolicy1.setVerticalStretch(0);
         sizePolicy1.setHeightForWidth(startButton->sizePolicy().hasHeightForWidth());
@@ -144,11 +144,19 @@ public:
 
         label = new QLabel(groupBox);
         label->setObjectName(QString::fromUtf8("label"));
+        QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
+        label->setSizePolicy(sizePolicy2);
 
         verticalLayout->addWidget(label);
 
         lcdNumber = new QLCDNumber(groupBox);
         lcdNumber->setObjectName(QString::fromUtf8("lcdNumber"));
+        sizePolicy2.setHeightForWidth(lcdNumber->sizePolicy().hasHeightForWidth());
+        lcdNumber->setSizePolicy(sizePolicy2);
+        lcdNumber->setMinimumSize(QSize(0, 50));
 
         verticalLayout->addWidget(lcdNumber);
 
