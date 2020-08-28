@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/open.ico</file>
+        <file>icon/start.ico</file>
+        <file>icon/save.ico</file>
+        <file>icon/resume1.ico</file>
+        <file>icon/resume.ico</file>
+        <file>icon/restart.ico</file>
+        <file>icon/quit.ico</file>
+        <file>icon/pause.ico</file>
+        <file>icon/resume0.ico</file>
+    </qresource>
+</RCC>
