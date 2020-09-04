@@ -4,13 +4,17 @@
 #include <QJsonArray>
 
 enum CardSuit {DIAMOND, CLUB, HEART, SPADE};
-enum CardPoint {THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE, TWO, JOKER, LITTLEJOKER, BIGJOKER};
+enum CardPoint {THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE, TWO, LITTLEJOKER, BIGJOKER};
 
 struct Card {
 	CardSuit suit;
 	CardPoint point;
 	Card() = default;
 	Card(const CardSuit &suit, const CardPoint &point);
+	Card(const int &x);
+	operator int() {
+		return suit * 13 + point;
+	}
 };
 
 class Cards {
@@ -20,14 +24,18 @@ class Cards {
 		int dragonLength;
 		CardPoint maxCardPoint;
 		CardShape shape;
-		bool getShape();
 
 	public:
 		Cards() = default;
 		Cards(const QVector<Card>::iterator &l, const QVector<Card>::iterator &r);
+		bool empty() const;
+		void clear();
+		bool getShape();
+		QVector<Card> getCards() const;
 		void insert(const Card &card);
+		void remove(const int &card);
+		QJsonArray toJson() const;
 		friend bool overwhelm(Cards i, Cards j);
-		QJsonArray toJson();
 };
 
 #endif // CARD_H

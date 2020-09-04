@@ -2,11 +2,38 @@
 #include <QJsonArray>
 
 Card::Card(const CardSuit &suit, const CardPoint &point) : suit(suit), point(point) {}
+Card::Card(const int &x) : suit(CardSuit(std::min(x / 13, int(SPADE)))) {
+	if (x < 52) {
+		point = CardPoint(x % 13);
+	} else {
+		point = CardPoint(x - 39);
+	}
+}
 
 Cards::Cards(const QVector<Card>::iterator &l, const QVector<Card>::iterator &r) {
 	for (auto p = l; p != r; ++p) {
 		cards.push_back(*p);
 	}
+}
+QVector<Card> Cards::getCards() const {
+	return cards;
+}
+void Cards::insert(const Card &card) {
+	cards.push_back(card);
+}
+void Cards::remove(const int &card) {
+	for (auto it = cards.begin(); it != cards.end(); ++it) {
+		if (int(*it) == card) {
+			cards.erase(it);
+			break;
+		}
+	}
+}
+bool Cards::empty() const {
+	return cards.empty();
+}
+void Cards::clear() {
+	cards.clear();
 }
 bool Cards::getShape() {
 	int h[15];
@@ -16,7 +43,7 @@ bool Cards::getShape() {
 	}
 	QVector<CardPoint> a[5];
 	for (int i = 0; i < 15; ++i) {
-		a[i].push_back(CardPoint(i));
+		a[h[i]].push_back(CardPoint(i));
 	}
 	if (a[1].size() == 1 && a[2].empty() && a[3].empty() && a[4].empty()) {
 		shape = SOLO, maxCardPoint = a[1][0];
@@ -68,15 +95,15 @@ bool Cards::getShape() {
 		shape = AIRPLANE, maxCardPoint = a[3][1];
 		return true;
 	}
-	if (a[3].size() + a[4].size() == 2 && a[2].empty()) {
+	if (a[3].size() + a[4].size() == 2) {
 		if (a[3].size() == 2) {
-			if (a[3][0] + 1 == a[3][1] && a[3][1] <= ACE && a[1].size() == 2) {
+			if (a[3][0] + 1 == a[3][1] && a[3][1] <= ACE && a[1].size() + a[2].size() * 2 == 2) {
 				shape = AIRPLANE_SOLO, maxCardPoint = a[3][1];
 				return true;
 			}
 		} else {
-			CardPoint minPoint = std::min(a[3][0], a[4][0]), maxPoint= std::max(a[3][0], a[4][0]);
-			if (minPoint + 1 == maxPoint && maxPoint <= ACE && a[1].size() == 1) {
+			CardPoint minPoint = std::min(a[3][0], a[4][0]), maxPoint = std::max(a[3][0], a[4][0]);
+			if (minPoint + 1 == maxPoint && maxPoint <= ACE && a[1].size() == 1 && a[2].empty()) {
 				shape = AIRPLANE_SOLO, maxCardPoint = maxPoint;
 				return true;
 			}
@@ -92,6 +119,7 @@ bool Cards::getShape() {
 	}
 	if (a[1].empty() && a[3].empty() && ((a[4].size() == 2 && a[2].empty()) || (a[4].size() == 1 && a[2].size() == 2))) {
 		shape = FOUR_PAIR, maxCardPoint = *a[4].rbegin();
+		return true;
 	}
 	if (a[2].empty() && a[3].empty()) {
 		if (a[4].size() == 1 && a[1].empty()) {
@@ -105,19 +133,22 @@ bool Cards::getShape() {
 	}
 	return false;
 }
-QJsonArray Cards::toJson() {
+QJsonArray Cards::toJson() const {
 	QJsonArray ret;
 	for (Card x: cards) {
-		ret.append(x.suit * 13 + x.point);
+		ret.append(int(x));
 	}
 	return ret;
 }
 
 bool overwhelm(Cards i, Cards j) {
-	j.getShape();
 	if (!i.getShape()) {
 		return false;
 	}
+	if (j.empty()) {
+		return true;
+	}
+	j.getShape();
 	if (i.shape != j.shape) {
 		return (i.shape == Cards::BOMB);
 	}
