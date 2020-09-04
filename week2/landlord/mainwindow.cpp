@@ -27,6 +27,7 @@ void MainWindow::sendMessage(const QJsonObject &info) {
 void MainWindow::updateRest() {
 	ui->leftRestLabel->setText("剩余" + QString::number(leftRest) + "张");
 	ui->rightRestLabel->setText("剩余" + QString::number(rightRest) + "张");
+	ui->myRestLabel->setText("剩余" + QString::number(cards.size()) + "张");
 }
 template<class T>
 void MainWindow::sortCards(QVector<T> &cards) {
@@ -64,6 +65,8 @@ void MainWindow::resizeEvent(QResizeEvent*) {
 	ui->leftIdentityLabel->move(10 + (UICard::width - ui->leftIdentityLabel->width()) / 2, (height() - UICard::height) / 2 - ui->leftIdentityLabel->height() - 10);
 	ui->rightIdentityLabel->move(width() - 10 - (UICard::width - ui->rightIdentityLabel->width()) / 2 - ui->rightIdentityLabel->width(), (height() - UICard::height) / 2 - ui->rightIdentityLabel->height() - 10);
 	ui->restartButton->move((width() - ui->restartButton->width()) / 2, height() - UICard::height - ui->restartButton->height() - 20);
+	ui->myRestLabel->move(width() - ui->myRestLabel->width() - 10, height() - ui->myRestLabel->height() - 10);
+	ui->myIdentityLabel->move(width() - ui->myIdentityLabel->width() - 10, height() - ui->myRestLabel->height() - ui->myIdentityLabel->height() - 20);
 }
 void MainWindow::paintEvent(QPaintEvent*) {
 	QPainter painter(this);
@@ -104,7 +107,8 @@ void MainWindow::mousePressEvent(QMouseEvent *e) {
 	}
 }
 void MainWindow::init() {
-	ui->myLabel->hide(), ui->leftLabel->hide(), ui->rightLabel->hide(), ui->leftRestLabel->hide(), ui->rightRestLabel->hide(), ui->leftIdentityLabel->hide(), ui->rightIdentityLabel->hide();
+	ui->myLabel->hide(), ui->myIdentityLabel->hide(), ui->myRestLabel->hide();
+	ui->leftLabel->hide(), ui->rightLabel->hide(), ui->leftRestLabel->hide(), ui->rightRestLabel->hide(), ui->leftIdentityLabel->hide(), ui->rightIdentityLabel->hide();
 	ui->callLandlordButton->hide(), ui->noCallButton->hide(), ui->playButton->hide(), ui->noPlayButton->hide(), ui->restartButton->hide();
 	cards.clear(), centralCards.clear(), lastPlay.clear();
 	dealt = showLandlordCards = playing = firstDisabled = false;
@@ -157,9 +161,10 @@ void MainWindow::processMessage(QByteArray msg) {
 			}
 			break;
 		case LANDLORD:
-			ui->leftIdentityLabel->setText("农民"), ui->rightIdentityLabel->setText("农民");
+			ui->leftIdentityLabel->setText("农民"), ui->rightIdentityLabel->setText("农民"), ui->myIdentityLabel->setText("农民");
 			if (info["ID"].toInt() == id) {
 				cards.push_back(landlordCards[0]), cards.push_back(landlordCards[1]), cards.push_back(landlordCards[2]), sortCards(cards);
+				ui->myIdentityLabel->setText("地主");
 				firstDisabled = true;
 			} else {
 				if (info["ID"].toInt() == (id + 1) % MaxPlayers) {
@@ -170,8 +175,8 @@ void MainWindow::processMessage(QByteArray msg) {
 			}
 			showLandlordCards = true, update();
 			ui->myLabel->hide(), ui->leftLabel->hide(), ui->rightLabel->hide();
-			ui->leftRestLabel->show(), ui->rightRestLabel->show(), updateRest();
-			ui->leftIdentityLabel->show(), ui->rightIdentityLabel->show();
+			ui->myRestLabel->show(), ui->leftRestLabel->show(), ui->rightRestLabel->show(), updateRest();
+			ui->myIdentityLabel->show(), ui->leftIdentityLabel->show(), ui->rightIdentityLabel->show();
 			break;
 		case PLAY:
 			if (firstDisabled) {
@@ -266,7 +271,7 @@ void MainWindow::on_playButton_clicked() {
 				++j;
 			}
 		}
-		update();
+		updateRest(), update();
 		QJsonObject sendInfo = initMessage(PLAY);
 		sendInfo.insert("clientID", id);
 		sendInfo.insert("cards", chosenCards.toJson());
@@ -302,11 +307,8 @@ void MainWindow::on_exitButton_clicked() { close(); }
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 	ui->setupUi(this);
-//	srand(time(nullptr));
-unsigned seed = time(nullptr);
-qDebug() << seed;
-srand(seed);
-	clientSocket = new QWebSocket;
+	srand(time(nullptr));
+	server = nullptr, clientSocket = new QWebSocket;
 	connect(clientSocket, SIGNAL(connected()), this, SLOT(serverConnected()));
 	connect(clientSocket, SIGNAL(disconnected()), this, SLOT(establishServer()));
 	connect(clientSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processMessage(QByteArray)));
@@ -315,7 +317,8 @@ srand(seed);
 	init();
 }
 MainWindow::~MainWindow() {
-	delete ui, delete clientSocket;
+	delete ui;
+	clientSocket->deleteLater();
 	if (server != nullptr) {
 		delete server;
 	}
