@@ -32,14 +32,13 @@ class MainWindow : public QMainWindow {
 			bool up;
 			QImage image;
 			QString fileName;
-			static int height, width;
 			UICard() = default;
-			UICard(const Card &base);
+			UICard(const Card &base, const int &cardHeight, const int &cardWidth);
 		} Padding, landlordCards[3];
 		Ui::MainWindow *ui;
 		QWebSocket *clientSocket;
 		Server *server;
-		int id, leftRest, rightRest, noPlayCount;
+		int id, leftRest, rightRest, noPlayCount, cardHeight, cardWidth;
 		bool dealt, showLandlordCards, playing, firstDisabled;
 		QVector<UICard> cards, centralCards;
 		Cards chosenCards, lastPlay;

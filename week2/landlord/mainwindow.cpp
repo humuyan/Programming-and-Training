@@ -7,9 +7,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 
-int MainWindow::UICard::height = 0;
-int MainWindow::UICard::width = 0;
-MainWindow::UICard::UICard(const Card &base) : Card(base) {
+MainWindow::UICard::UICard(const Card &base, const int &cardWidth, const int &cardHeight) : Card(base) {
 	QString name;
 	switch (point) {
 		case LITTLEJOKER: name = "LITTLEJOKER"; break;
@@ -17,7 +15,7 @@ MainWindow::UICard::UICard(const Card &base) : Card(base) {
 		default: name = "DCHS"[suit] + QString::number(point <= KING ? point + 3 : point - 10); break;
 	}
 	fileName = ":/cardpic/" + name + ".png";
-	image = QImage(fileName).scaled(width, height);
+	image = QImage(fileName).scaled(cardWidth, cardHeight);
 	up = false;
 }
 
@@ -37,63 +35,63 @@ void MainWindow::resizeEvent(QResizeEvent*) {
 	ui->startButton->move(width() - ui->startButton->width(), 0);
 	ui->exitButton->move(width() - ui->exitButton->width(), ui->startButton->height());
 	if (height() / 4.0 / 29 < width() / 24.0 * 5 / 21) {
-		UICard::height = height() / 5.0, UICard::width = UICard::height / 29.0 * 21;
+		cardHeight = height() / 5.0, cardWidth = cardHeight / 29.0 * 21;
 	} else {
-		UICard::width = width() / 24.0 * 5, UICard::height = UICard::width / 21.0 * 29;
+		cardWidth = width() / 24.0 * 5, cardHeight = cardWidth / 21.0 * 29;
 	}
-	Padding.image = QImage(Padding.fileName).scaled(UICard::width, UICard::height);
-	if (showLandlordCards) {
+	Padding.image = QImage(Padding.fileName).scaled(cardWidth, cardHeight);
+	if (dealt) {
 		for (UICard &card: landlordCards) {
-			card.image = QImage(card.fileName).scaled(UICard::width, UICard::height);
+			card.image = QImage(card.fileName).scaled(cardWidth, cardHeight);
 		}
 	}
 	for (UICard &card: cards) {
-		card.image = QImage(card.fileName).scaled(UICard::width, UICard::height);
+		card.image = QImage(card.fileName).scaled(cardWidth, cardHeight);
 	}
 	for (UICard &card: centralCards) {
-		card.image = QImage(card.fileName).scaled(UICard::width, UICard::height);
+		card.image = QImage(card.fileName).scaled(cardWidth, cardHeight);
 	}
-	ui->callLandlordButton->move((width() - ui->callLandlordButton->width() * 3) / 2, height() - UICard::height - ui->callLandlordButton->height() - 20);
-	ui->noCallButton->move((width() - ui->noCallButton->width() * 3) / 2 + ui->noCallButton->width() * 2, height() - UICard::height - ui->noCallButton->height() - 20);
-	ui->playButton->move((width() - ui->playButton->width() * 3) / 2, height() - UICard::height * 1.2 - ui->playButton->height() - 20);
-	ui->noPlayButton->move((width() - ui->noPlayButton->width() * 3) / 2 + ui->noPlayButton->width() * 2, height() - UICard::height * 1.2 - ui->noPlayButton->height() - 20);
-	ui->myLabel->move((width() - ui->myLabel->width()) / 2, height() - UICard::height - ui->myLabel->height() - 30);
-	ui->leftLabel->move(UICard::width + 20, (height() - ui->leftLabel->height()) / 2);
-	ui->rightLabel->move(width() - UICard::width - ui->rightLabel->width() - 20, (height() - ui->leftLabel->height()) / 2);
-	ui->leftRestLabel->move(10 + (UICard::width - ui->leftRestLabel->width()) / 2, (height() - UICard::height) / 2 + UICard::height + 10);
-	ui->rightRestLabel->move(width() - 10 - (UICard::width - ui->rightRestLabel->width()) / 2 - ui->rightRestLabel->width(), (height() - UICard::height) / 2 + UICard::height + 10);
-	ui->leftIdentityLabel->move(10 + (UICard::width - ui->leftIdentityLabel->width()) / 2, (height() - UICard::height) / 2 - ui->leftIdentityLabel->height() - 10);
-	ui->rightIdentityLabel->move(width() - 10 - (UICard::width - ui->rightIdentityLabel->width()) / 2 - ui->rightIdentityLabel->width(), (height() - UICard::height) / 2 - ui->rightIdentityLabel->height() - 10);
-	ui->restartButton->move((width() - ui->restartButton->width()) / 2, height() - UICard::height - ui->restartButton->height() - 20);
+	ui->callLandlordButton->move((width() - ui->callLandlordButton->width() * 3) / 2, height() - cardHeight - ui->callLandlordButton->height() - 20);
+	ui->noCallButton->move((width() - ui->noCallButton->width() * 3) / 2 + ui->noCallButton->width() * 2, height() - cardHeight - ui->noCallButton->height() - 20);
+	ui->playButton->move((width() - ui->playButton->width() * 3) / 2, height() - cardHeight * 1.2 - ui->playButton->height() - 20);
+	ui->noPlayButton->move((width() - ui->noPlayButton->width() * 3) / 2 + ui->noPlayButton->width() * 2, height() - cardHeight * 1.2 - ui->noPlayButton->height() - 20);
+	ui->myLabel->move((width() - ui->myLabel->width()) / 2, height() - cardHeight - ui->myLabel->height() - 30);
+	ui->leftLabel->move(cardWidth + 20, (height() - ui->leftLabel->height()) / 2);
+	ui->rightLabel->move(width() - cardWidth - ui->rightLabel->width() - 20, (height() - ui->leftLabel->height()) / 2);
+	ui->leftRestLabel->move(10 + (cardWidth - ui->leftRestLabel->width()) / 2, (height() - cardHeight) / 2 + cardHeight + 10);
+	ui->rightRestLabel->move(width() - 10 - (cardWidth - ui->rightRestLabel->width()) / 2 - ui->rightRestLabel->width(), (height() - cardHeight) / 2 + cardHeight + 10);
+	ui->leftIdentityLabel->move(10 + (cardWidth - ui->leftIdentityLabel->width()) / 2, (height() - cardHeight) / 2 - ui->leftIdentityLabel->height() - 10);
+	ui->rightIdentityLabel->move(width() - 10 - (cardWidth - ui->rightIdentityLabel->width()) / 2 - ui->rightIdentityLabel->width(), (height() - cardHeight) / 2 - ui->rightIdentityLabel->height() - 10);
+	ui->restartButton->move((width() - ui->restartButton->width()) / 2, height() - cardHeight - ui->restartButton->height() - 20);
 	ui->myRestLabel->move(width() - ui->myRestLabel->width() - 10, height() - ui->myRestLabel->height() - 10);
 	ui->myIdentityLabel->move(width() - ui->myIdentityLabel->width() - 10, height() - ui->myRestLabel->height() - ui->myIdentityLabel->height() - 20);
 }
 void MainWindow::paintEvent(QPaintEvent*) {
 	QPainter painter(this);
 	painter.setBrush(Qt::white), painter.fillRect(0, 0, width(), height(), painter.brush());
-	int offsetX = (width() - 3 * UICard::width) / 2;
+	int offsetX = (width() - 3 * cardWidth) / 2;
 	if (dealt) {
 		for (int i = 0; i < 3; ++i) {
-			painter.drawImage(offsetX + i * UICard::width, 0, showLandlordCards ? landlordCards[i].image : Padding.image);
+			painter.drawImage(offsetX + i * cardWidth, 0, showLandlordCards ? landlordCards[i].image : Padding.image);
 		}
-		painter.drawImage(10, (height() - UICard::height) / 2, Padding.image);
-		painter.drawImage(width() - UICard::width - 10, (height() - UICard::height) / 2, Padding.image);
+		painter.drawImage(10, (height() - cardHeight) / 2, Padding.image);
+		painter.drawImage(width() - cardWidth - 10, (height() - cardHeight) / 2, Padding.image);
 	}
-	offsetX = (width() - (cards.size() + 4) / 5.0 * UICard::width) / 2;
+	offsetX = (width() - (cards.size() + 4) / 5.0 * cardWidth) / 2;
 	for (int i = 0; i < cards.size(); ++i) {
-		painter.drawImage(offsetX + i * UICard::width / 5.0, height() - UICard::height * (cards[i].up ? 1.2 : 1) - 10, cards[i].image);
+		painter.drawImage(offsetX + i * cardWidth / 5.0, height() - cardHeight * (cards[i].up ? 1.2 : 1) - 10, cards[i].image);
 	}
-	offsetX = (width() - (centralCards.size() + 4) / 5.0 * UICard::width) / 2;
+	offsetX = (width() - (centralCards.size() + 4) / 5.0 * cardWidth) / 2;
 	for (int i = 0; i < centralCards.size(); ++i) {
-		painter.drawImage(offsetX + i * UICard::width / 5.0, (height() - UICard::height) / 2, centralCards[i].image);
+		painter.drawImage(offsetX + i * cardWidth / 5.0, (height() - cardHeight) / 2, centralCards[i].image);
 	}
 }
 void MainWindow::mousePressEvent(QMouseEvent *e) {
 	if (e->button() == Qt::LeftButton && playing) {
-		int offsetX = (width() - (cards.size() + 4) / 5.0 * UICard::width) / 2;
-		if (e->x() >= offsetX && e->x() <= offsetX + (cards.size() + 4) * UICard::width / 5) {
-			int i = std::min<int>((e->x() - offsetX) * 5.0 / UICard::width, cards.size() - 1), offsetY = height() - UICard::height * (cards[i].up ? 1.2 : 1) - 10;
-			if (e->y() >= offsetY && e->y() <= offsetY + UICard::height) {
+		int offsetX = (width() - (cards.size() + 4) / 5.0 * cardWidth) / 2;
+		if (e->x() >= offsetX && e->x() <= offsetX + (cards.size() + 4) * cardWidth / 5) {
+			int i = std::min<int>((e->x() - offsetX) * 5.0 / cardWidth, cards.size() - 1), offsetY = height() - cardHeight * (cards[i].up ? 1.2 : 1) - 10;
+			if (e->y() >= offsetY && e->y() <= offsetY + cardHeight) {
 				if (cards[i].up) {
 					cards[i].up = false;
 					chosenCards.remove(int(cards[i]));
@@ -137,12 +135,12 @@ void MainWindow::processMessage(QByteArray msg) {
 			cardArray = info["cards"].toArray();
 			cards.clear();
 			for (QJsonValue x: cardArray) {
-				cards.push_back(Card(x.toInt()));
+				cards.push_back(UICard(Card(x.toInt()), cardWidth, cardHeight));
 			}
 			sortCards(cards), update();
 			cardArray = info["landlordCards"].toArray();
 			for (int i = 0; i < 3; ++i) {
-				landlordCards[i] = Card(cardArray.at(i).toInt());
+				landlordCards[i] = UICard(Card(cardArray.at(i).toInt()), cardWidth, cardHeight);
 			}
 			leftRest = rightRest = 17;
 			break;
@@ -213,7 +211,7 @@ void MainWindow::processMessage(QByteArray msg) {
 			} else {
 				centralCards.clear();
 				for (QJsonValue x: cardArray) {
-					centralCards.push_back(Card(x.toInt()));
+					centralCards.push_back(UICard(Card(x.toInt()), cardWidth, cardHeight));
 				}
 				sortCards(centralCards);
 				lastPlay.clear();
@@ -313,7 +311,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(clientSocket, SIGNAL(disconnected()), this, SLOT(establishServer()));
 	connect(clientSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processMessage(QByteArray)));
 	Padding.fileName = ":/cardpic/PADDING.png";
-	Padding.image = QImage(Padding.fileName).scaled(UICard::width, UICard::height);
+	Padding.image = QImage(Padding.fileName).scaled(cardWidth, cardHeight);
 	init();
 }
 MainWindow::~MainWindow() {
