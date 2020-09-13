@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+  <!-- Page Content -->
+<div class="container">
+
+<div class="row align-items-center my-5">
+    <div class="col-lg-3">
+        <img class="img-fluid rounded mb-4 mb-lg-0" src="{% static "" %}movie_data/{{ movie.movieID }}.jpg" alt="">
+    </div>
+    <div class="col" valign="top">
+        <h1 class="font-weight-light">{{ movie.name }}</h1>
+        <br>
+        <p>{{ movie.description }}</p>
+        <p>上映年份：{{ movie.year }}</p>
+        <p>片长：{{ movie.duration }}分钟</p>
+    </div>
+</div>
+
+<h4>精选评论</h4>
+{% for comment in comments %}
+    <div class="card text-white bg-secondary my-3 py-0 text-left">
+        <div class="card-body">
+            <p class="text-white m-0">
+                {{ comment.content }}
+                <br>
+            </p>
+        </div>
+    </div>
+{% endfor %}
+<br><br>
+
+<h4>演员列表</h4>
+<br>
+<div class="row">
+{% for actor in movie.actors.all %}
+    <div class="col-md-2 mb-4">
+        <a href="/actor/{{ actor.actorID }}">
+        <div class="card h-100">
+            <img src="{% static "" %}actor_data/{{actor.actorID}}.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+                <p class="card-text">{{ actor.name }}</p>
+            </div>
+        </div>
+        </a>
+    </div>
+{% endfor %}
+</div>
+
+</div>
+
+
+{% endblock %}

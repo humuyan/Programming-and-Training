@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{爬取思路}{2}{0}{1}
+\beamer@sectionintoc {2}{网页页面获取}{5}{0}{2}
+\beamer@sectionintoc {3}{页面信息提取}{9}{0}{3}
+\beamer@sectionintoc {4}{实际效果}{16}{0}{4}

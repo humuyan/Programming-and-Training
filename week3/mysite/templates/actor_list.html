@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<main role="main">
+
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                {% for actor in actors %}
+                    <div class="col-md-2 mb-4">
+                        <a href="/actor/{{actor.actorID}}">
+                        <div class="card h-100">
+                            <img class="card-img-top" src="{% static "" %}actor_data/{{actor.actorID}}.jpg">
+                            <div class="card-body">
+                                <p class="card-text">{{actor.name}}</p>
+                            </div>
+                        </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <ul class="pagination justify-content-center">
+        {% for x in paginator %}
+            {% if x != 0 %} <li class="page-item"><a class="page-link" href="/actor_list?page={{ x }}">{{ x }}</a></li>
+            {% else %} &nbsp;<h3 class="text-muted">···</h3>&nbsp;
+            {% endif %}
+        {% endfor %}
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <li>
+            <form method="get" action="/actor_list" class="form-inline">
+                <div style="margin: auto;">
+                    <input type="text" class="form-control" placeholder="输入页码" style="width: 8vw;" name="page">
+                    <button class="btn btn-outline-secondary" id="button-addon2" type="submit">Go！</button>
+                </div>
+            </form>
+        </li>
+    </ul>
+</main>
+
+{% endblock %}

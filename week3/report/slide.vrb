@@ -1,0 +1,13 @@
+\frametitle{网页页面获取}
+\begin{lstlisting}
+req = Request(url)
+req.add_header("User-Agent", Header)
+sourceCode = urlopen(req).read().decode("utf-8")
+\end{lstlisting}
+^^I\begin{itemize}
+^^I^^I\item \texttt{Header}为一个消息头字符串：\texttt{Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36}
+^^I^^I\pause \item 加入后可降低被反爬虫的概率
+^^I^^I\begin{itemize}
+^^I^^I^^I\item 实测在随机\texttt{sleep} $2\sim 3$s的爬取速度下不会被封
+^^I^^I\end{itemize}
+^^I\end{itemize}

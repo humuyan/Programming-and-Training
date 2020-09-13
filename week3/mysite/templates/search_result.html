@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<br>
+{% if keyword|length > 20 %}
+   <h4 style="text-align: center;">搜索文本长度不能超过20字</h4>
+{% else %}
+    <h5>&nbsp;&nbsp;&nbsp;“{{ keyword }}”在{{ type }}中的搜索结果（共{{ total_results }}条，耗时{{ runtime }}ms）：</h5>
+    <br>
+    <div class="container">
+    {% if type == "影视" %}
+        <div class="row">
+            {% for movie in result %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100">
+                        <a href="/movie/{{movie.movieID}}">
+                            <img class="card-img-top" src="{% static "" %}movie_data/{{movie.movieID}}.jpg" style="height: 32vw; object-fit: cover;">
+                        </a>
+                        <div class="card-body d-flex flex-column">
+                            <p class="card-text">{{movie.name}}（{{movie.year}}）</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <a href="/movie/{{movie.movieID}}">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">详情</button>
+                                </a>
+                                <small class="text-muted">
+                                    {% if movie.duration == 0 %} N/A
+                                    {% else %} {{movie.duration}}
+                                    {% endif %}
+                                    分钟
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% elif type == "演员" %}
+        <div class="album py-5 bg-light">
+            <div class="container">
+                <div class="row">
+                    {% for actor in result %}
+                        <div class="col-md-2 mb-4">
+                            <a href="/actor/{{actor.actorID}}">
+                            <div class="card h-100">
+                                <img class="card-img-top" src="{% static "" %}actor_data/{{actor.actorID}}.jpg">
+                                <div class="card-body">
+                                    <p class="card-text">{{actor.name}}</p>
+                                </div>
+                            </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        {% for comment in result %}
+            <div class="card text-white bg-secondary my-3 py-0 text-left">
+                <a href="/movie/{{ comment.movie.movieID }}">
+                    <div class="card-header" style="background-color: #00AA9E; color: white;">{{ comment.movie.name }}</div>
+                </a>
+                <div class="card-body">
+                    <p class="text-white m-0">
+                        {{ comment.content }}
+                        <br>
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <ul class="pagination justify-content-center">
+        {% for x in paginator %}
+            {% if x != 0 %} <li class="page-item"><a class="page-link" href="/search_result?type={{ type }}&keyword={{ keyword }}&page={{ x }}">{{ x }}</a></li>
+            {% else %} &nbsp;<h3 class="text-muted">···</h3>&nbsp;
+            {% endif %}
+        {% endfor %}
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <li>
+            <form method="get" action="/search_result" class="form-inline">
+                <div style="margin: auto;">
+                    <input type="text" class="form-control" placeholder="输入页码" style="width: 8vw;" name="page">
+                    <input type="hidden" name="type" value="{{ type }}">
+                    <input type="hidden" name="keyword" value="{{ keyword }}">
+                    <button class="btn btn-outline-secondary" id="button-addon2" type="submit">Go！</button>
+                </div>
+            </form>
+        </li>
+    </ul>
+    </div>
+{% endif %}
+
+{% endblock %}

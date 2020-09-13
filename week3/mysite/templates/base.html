@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+      {% load static %}
+
+    <!-- Bootstrap core CSS -->
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+    <!-- Custom styles for this template -->
+  </head>
+  <body>
+    <header>
+  <div class="navbar navbar-dark bg-dark shadow-sm">
+      <a href="/" class="navbar-brand d-flex align-items-center">
+          <strong>豆瓣电影检索</strong>
+      </a>
+      <div class="btn-group" style="margin-right: auto">
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <a href="/movie_list?page=1">
+              <button type="button" class="btn btn-sm btn-secondary">电影列表</button>
+          </a>
+          &nbsp;&nbsp;
+          <a href="/actor_list?page=1">
+              <button type="button" class="btn btn-sm btn-secondary">演员列表</button>
+          </a>
+      </div>
+      <form action="/search_result" method="get" class="form-inline">
+          <select class="custom-select" style="width: 6vw; margin-left: auto;" name="type">
+              <option value="影视">影视</option>
+              <option value="演员">演员</option>
+              <option value="影评">影评</option>
+          </select>
+          &nbsp;&nbsp;
+          <input type="text" class="form-control" name="keyword">
+          <button class="btn btn-info btn-search" type="submit" style="background-color: #00AA9E;">查找</button>
+      </form>
+  </div>
+</header>
+  </body>
+
+{% block content %}
+{% endblock %}
+
+<footer class="text-muted">
+  <div class="container">
+    <p class="float-right">
+      <a href="#">Back to top</a>
+    </p>
+    <p>Powered by Album example &copy;Bootstrap</p>
+  </div>
+</footer>
+</html>
